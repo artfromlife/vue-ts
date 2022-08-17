@@ -24,7 +24,7 @@ import type { ComponentOptions } from 'types/options'
  * how to merge a parent option value and a child option
  * value into the final value.
  */
-const strats = config.optionMergeStrategies
+const strats = config.optionMergeStrategies // {} -> null
 
 /**
  * Options with restrictions
