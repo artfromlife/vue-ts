@@ -376,7 +376,7 @@ export function stateMixin(Vue: typeof Component) {
     const watcher = new Watcher(vm, expOrFn, cb, options) // 创建watcher, 实例化的watcher的时候进行的依赖收集
     if (options.immediate) { // 立即执行的watcher
       const info = `callback for immediate watcher "${watcher.expression}"`
-      pushTarget() // ??? 这样的话不会触发依赖收集的，俺不理解
+      pushTarget() // ??? 这样的话不会触发依赖收集的，俺不理解 ， 确保不会进行依赖收集！！！！！
       invokeWithErrorHandling(cb, vm, [watcher.value], vm, info)
       popTarget()
     }
