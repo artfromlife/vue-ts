@@ -395,17 +395,17 @@ function assertObjectType(name: string, value: any, vm: Component | null) {
 export function mergeOptions(
   parent: Record<string, any>,
   child: Record<string, any>,
-  vm?: Component | null
+  vm?: Component | null // 通过这个来判断是继承的选项合并， 还是实例化的时候的选项合并
 ): ComponentOptions {
   if (__DEV__) {
     checkComponents(child)
   }
-
+  // ????
   if (isFunction(child)) {
     // @ts-expect-error
     child = child.options
   }
-
+  // 都是对 child 的处理
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)

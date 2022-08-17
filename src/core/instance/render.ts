@@ -100,7 +100,7 @@ export function renderMixin(Vue: typeof Component) {
     return nextTick(fn, this)
   }
 
-  Vue.prototype._render = function (): VNode {
+  Vue.prototype._render = function (): VNode { // 创建VNode
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 

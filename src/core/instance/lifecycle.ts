@@ -59,7 +59,7 @@ export function initLifecycle(vm: Component) {
 }
 
 export function lifecycleMixin(Vue: typeof Component) {
-  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) { // 调用 __patch__ 方法
     const vm: Component = this
     const prevEl = vm.$el
     const prevVnode = vm._vnode
@@ -93,6 +93,7 @@ export function lifecycleMixin(Vue: typeof Component) {
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
+      // 强制运行当前渲染watcher 的回调
       vm._watcher.update()
     }
   }
@@ -107,6 +108,7 @@ export function lifecycleMixin(Vue: typeof Component) {
     // remove self from parent
     const parent = vm.$parent
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
+      // 从parent的 $children 中把自己移除
       remove(parent.$children, vm)
     }
     // teardown scope. this includes both the render watcher and other
@@ -129,7 +131,7 @@ export function lifecycleMixin(Vue: typeof Component) {
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
-    // release circular reference (#6759)
+    // release circular reference (#6759) 会导致内存泄露吧
     if (vm.$vnode) {
       vm.$vnode.parent = null
     }
