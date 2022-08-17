@@ -38,6 +38,7 @@ export default class Dep {
 
   depend(info?: DebuggerEventExtraInfo) {
     if (Dep.target) {
+      // 向Watcher 里面加 dep
       Dep.target.addDep(this)
       if (__DEV__ && info && Dep.target.onTrack) {
         Dep.target.onTrack({

@@ -11,8 +11,9 @@ let pending = false
 
 function flushCallbacks() {
   pending = false
+  // 为什么复制一份， 害怕 cb 执行的收 callbacks 的长度又增加了，确实
   const copies = callbacks.slice(0)
-  callbacks.length = 0
+  callbacks.length = 0  // 这个期间产生的 微任务稍后又会被执行..
   for (let i = 0; i < copies.length; i++) {
     copies[i]()
   }
@@ -104,9 +105,9 @@ export function nextTick(cb?: (...args: any[]) => any, ctx?: object) {
       _resolve(ctx)
     }
   })
-  if (!pending) {
+  if (!pending) { // 第一次进来的callback 会让pending为 true ,和 queueWatcher 类似,
     pending = true
-    timerFunc()
+    timerFunc() // 创建一个异步任务将来执行 cbs
   }
   // $flow-disable-line
   if (!cb && typeof Promise !== 'undefined') {

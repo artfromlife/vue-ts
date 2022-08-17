@@ -368,19 +368,19 @@ export function stateMixin(Vue: typeof Component) {
     options?: Record<string, any>
   ): Function {
     const vm: Component = this
-    if (isPlainObject(cb)) {
+    if (isPlainObject(cb)) { // cb 是纯粹的对象的时候... ， cb 不能是数组了吗 ？？？？ ， 可能在 watcher 选项里还是可以写数组的
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
-    options.user = true
-    const watcher = new Watcher(vm, expOrFn, cb, options)
-    if (options.immediate) {
+    options.user = true // 标记为用户 watcher
+    const watcher = new Watcher(vm, expOrFn, cb, options) // 创建watcher, 实例化的watcher的时候进行的依赖收集
+    if (options.immediate) { // 立即执行的watcher
       const info = `callback for immediate watcher "${watcher.expression}"`
-      pushTarget()
+      pushTarget() // ??? 这样的话不会触发依赖收集的，俺不理解
       invokeWithErrorHandling(cb, vm, [watcher.value], vm, info)
       popTarget()
     }
-    return function unwatchFn() {
+    return function unwatchFn() { // 返回 watcher的teardown 方法， watcher 和 dep 的双向清洗
       watcher.teardown()
     }
   }

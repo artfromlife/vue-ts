@@ -239,6 +239,7 @@ export function set(
   const ob = (target as any).__ob__
   if (isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
+    // 数组的这个操作就相当于 setter, 就直接通知更新了
     target.splice(key, 1, val)
     // when mocking for SSR, array methods are not hijacked
     if (ob && !ob.shallow && ob.mock) {
@@ -258,10 +259,11 @@ export function set(
       )
     return val
   }
-  if (!ob) {
+  if (!ob) { // 不是在响应式的对象里加东西, 直接返回
     target[key] = val
     return val
   }
+  // 添加新的响应式 Key， 这是一个新的 defineReactive
   defineReactive(ob.value, key, val, undefined, ob.shallow, ob.mock)
   if (__DEV__) {
     ob.dep.notify({
@@ -272,6 +274,8 @@ export function set(
       oldValue: undefined
     })
   } else {
+    // 添加完就通知依赖 这个响应式对象的watcher去更新
+    // 如果之前没有依赖收集的话， 咋个也不会更新
     ob.dep.notify()
   }
   return val
@@ -289,6 +293,7 @@ export function del(target: any[] | object, key: any) {
     )
   }
   if (isArray(target) && isValidArrayIndex(key)) {
+    // 数组就是这样
     target.splice(key, 1)
     return
   }
@@ -306,11 +311,12 @@ export function del(target: any[] | object, key: any) {
       warn(`Delete operation on key "${key}" failed: target is readonly.`)
     return
   }
-  if (!hasOwn(target, key)) {
+  if (!hasOwn(target, key)) { // 压根就没这个key
     return
   }
+  // 就是删除
   delete target[key]
-  if (!ob) {
+  if (!ob) { // 看看是不是响应式对象
     return
   }
   if (__DEV__) {

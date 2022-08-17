@@ -71,7 +71,7 @@ export function eventsMixin(Vue: typeof Component) {
       ;(vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
-      if (hookRE.test(event)) {
+      if (hookRE.test(event)) { // hookEvent !!!!
         vm._hasHookEvent = true
       }
     }
@@ -80,7 +80,7 @@ export function eventsMixin(Vue: typeof Component) {
 
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
-    function on() {
+    function on() { // 包了一下， 直接执行 $off
       vm.$off(event, on)
       fn.apply(vm, arguments)
     }
@@ -106,7 +106,7 @@ export function eventsMixin(Vue: typeof Component) {
       }
       return vm
     }
-    // specific event
+    // specific event !是ts的非空断言
     const cbs = vm._events[event!]
     if (!cbs) {
       return vm
@@ -121,6 +121,7 @@ export function eventsMixin(Vue: typeof Component) {
     while (i--) {
       cb = cbs[i]
       if (cb === fn || cb.fn === fn) {
+        // 为什么要一个一个的删除啊 ？？？？
         cbs.splice(i, 1)
         break
       }
@@ -151,6 +152,7 @@ export function eventsMixin(Vue: typeof Component) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       const args = toArray(arguments, 1)
       const info = `event handler for "${event}"`
+      // 可见 $emit() 是立即执行的
       for (let i = 0, l = cbs.length; i < l; i++) {
         invokeWithErrorHandling(cbs[i], vm, args, vm, info)
       }

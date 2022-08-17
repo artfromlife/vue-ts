@@ -75,7 +75,7 @@ function flushSchedulerQueue() {
   currentFlushTimestamp = getNow()
   flushing = true
   let watcher, id
-
+  // 这个排序可能和 组件的初始化有关, 为了一些特定的目的。。。
   // Sort queue before flush.
   // This ensures that:
   // 1. Components are updated from parent to child. (because parent is always
@@ -95,7 +95,7 @@ function flushSchedulerQueue() {
     }
     id = watcher.id
     has[id] = null
-    watcher.run()
+    watcher.run() // 这里又执行了 watcher 的 run 方法
     // in dev build, check and stop circular updates.
     if (__DEV__ && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
@@ -165,18 +165,22 @@ function callActivatedHooks(queue) {
  */
 export function queueWatcher(watcher: Watcher) {
   const id = watcher.id
-  if (has[id] != null) {
+  // 这里不是 严格不等， 等于说一个watcher  只能进到这个 has 对象一次
+  if (has[id] != null) { // has 是一个对象 key 只能是 number ; value 是 true | null | undefined
     return
   }
 
+  // 这个不懂
   if (watcher === Dep.target && watcher.noRecurse) {
     return
   }
 
   has[id] = true
-  if (!flushing) {
+
+
+  if (!flushing) { // 不是在watcher队列的执行过程中, watcher 直接入队
     queue.push(watcher)
-  } else {
+  } else { // 如果是在watcher队列的执行过程中
     // if already flushing, splice the watcher based on its id
     // if already past its id, it will be run next immediately.
     let i = queue.length - 1
@@ -186,13 +190,15 @@ export function queueWatcher(watcher: Watcher) {
     queue.splice(i + 1, 0, watcher)
   }
   // queue the flush
-  if (!waiting) {
+  if (!waiting) { // 第一个watcher 刚进来的时候  waiting 是 false, 就会进来
     waiting = true
 
     if (__DEV__ && !config.async) {
       flushSchedulerQueue()
       return
     }
+    // nextTick 执行 flushSchedulerQueue
+    // nextTick 内部会有一个数组来存回调
     nextTick(flushSchedulerQueue)
   }
 }
