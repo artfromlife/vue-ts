@@ -103,7 +103,8 @@ export default class Watcher implements DepTarget {
     this.expression = __DEV__ ? expOrFn.toString() : '' // 生产环境没有 expression , 为啥， 应该是为了报错提示吧
     // parse expression for getter
     if (isFunction(expOrFn)) {
-      this.getter = expOrFn // 执行getter不会触发依赖收集， get（）里面包的 getter 才会进行依赖收集
+                            // renderWatcher 也是function
+      this.getter = expOrFn // 执行getter不会触发依赖收集， get（）里面包的 getter 才会进行依赖收集 (就是computed 函数)
     } else {
       this.getter = parsePath(expOrFn) // 其实就是深度访问 a.b.c.d.e.f
       if (!this.getter) {
@@ -194,12 +195,12 @@ export default class Watcher implements DepTarget {
   update() {
     /* istanbul ignore else */
     if (this.lazy) { // lazy 的话就压根不执行 , 刚进来 dirty === lazy
-      this.dirty = true
-    } else if (this.sync) { // sync 就立马执行回调
+      this.dirty = true // 我 dirty 了, 再次访问 computedKey的时候才会进行 重新计算
+    } else if (this.sync) { // sync 就立马执行回调, 渲染watcher 绝对不会这样， 但是用户watcher , computed 由于用户不能传选项， 所以只有用户 watcher 会走这里
       this.run()
     } else {
       // 异步的更新！！！, watcher 不能频繁的被更新, 应当放到一个队列里等着,在一个tick里, 你的watcher 可能想执行 10000次， 但是只会执行最后一次进来的
-      queueWatcher(this)
+      queueWatcher(this) // 最后还是会触发 run 方法
     }
   }
 

@@ -64,14 +64,14 @@ export function lifecycleMixin(Vue: typeof Component) {
     const prevEl = vm.$el
     const prevVnode = vm._vnode
     const restoreActiveInstance = setActiveInstance(vm)
-    vm._vnode = vnode
+    vm._vnode = vnode // 为啥又来一次, render() 执行的时候已经给过了， preVNode , 之前的VNode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // updates vm.$el 是什么， 如果是真实的DOM元素， 为啥不用 insert
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
@@ -169,7 +169,7 @@ export function mountComponent(
     }
   }
   callHook(vm, 'beforeMount')
-
+  // beforeMount 甚至 渲染 watcher 都还没有出来
   let updateComponent
   /* istanbul ignore if */
   if (__DEV__ && config.performance && mark) {
@@ -191,6 +191,9 @@ export function mountComponent(
     }
   } else {
     updateComponent = () => {
+      // 这个就是 render Watcher 要观测的组件虚拟DOM
+      // 渲染Watcher 一定是比用户的watcher, computed 执行晚的, 但是子组件呢                                         // 再次进行依赖收集，新旧的 dep
+      // vm.render() 执行的过程中, 进行的依赖收集， 依赖更新，通过 notify -> update -> queueWatcher -> run -> get -> vm._update()
       vm._update(vm._render(), hydrating)
     }
   }
@@ -211,11 +214,12 @@ export function mountComponent(
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // 实例化渲染 watcher 的时候就直接 执行了getter: updateComponent 者不是异步的，直接就执行了
   new Watcher(
     vm,
-    updateComponent,
-    noop,
-    watcherOptions,
+    updateComponent, // getter, 类似于 computed 的感觉
+    noop, // 这个 renderWatcher 竟然也是没有回调的
+    watcherOptions, // 仅仅是加入了一个 before 的 hook, beforeUpdate() 钩子
     true /* isRenderWatcher */
   )
   hydrating = false
@@ -395,7 +399,7 @@ export function callHook(
   pushTarget()
   const prev = currentInstance
   setContext && setCurrentInstance(vm)
-  const handlers = vm.$options[hook]
+  const handlers = vm.$options[hook] // 选项里面的 hook 本来是函数，最后变成了数组， 。。。 这个 和 合并选项有关
   const info = `${hook} hook`
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {

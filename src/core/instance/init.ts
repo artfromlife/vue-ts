@@ -40,13 +40,14 @@ export function initMixin(Vue: typeof Component) {
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options as any)
-    } else { // 4. 初次的 new 会进这里吧 ， 给实例加 $options，合并选项
+    } else { // 4. 初次的 new 会进这里吧 ， 给实例加 $options，合并选项， 明明有更好理解的方式来写这个东西，呵呵
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor as any),
         options || {},
         vm
       )
     }
+    // 就是一个选项合并（建议之后再看）
     /* istanbul ignore else */
     if (__DEV__) {
       initProxy(vm)
@@ -58,7 +59,7 @@ export function initMixin(Vue: typeof Component) {
     initLifecycle(vm) // 7. 通过 $options 构建$parent, $children
     initEvents(vm) // 8. 可能和父组件，监听子组件事件有关系 _events
     initRender(vm) // 9. 这点有点复杂，不是很懂
-    callHook(vm, 'beforeCreate', undefined, false /* setContext */)
+    callHook(vm, 'beforeCreate', undefined, false /* setContext */) // callHook 执行的是 Hooks 数组
     initInjections(vm) // resolve injections before data/props
     initState(vm) // 10. 这就是先 让 数据变成 reactive
     initProvide(vm) // resolve provide after data/props
@@ -71,7 +72,8 @@ export function initMixin(Vue: typeof Component) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 
-    if (vm.$options.el)  // 这个el 只有跟组件才有
+    if (vm.$options.el)  // 这个el 只有跟组件才有, 那么子组件怎么 mount 呢
+      // 开始挂载了
       vm.$mount(vm.$options.el)
     }
   }
@@ -100,10 +102,11 @@ export function initInternalComponent(
 }
 
 export function resolveConstructorOptions(Ctor: typeof Component) {
+  // Ctor 实例的构造函数
   let options = Ctor.options
-  if (Ctor.super) {
-    const superOptions = resolveConstructorOptions(Ctor.super)
-    const cachedSuperOptions = Ctor.superOptions
+  if (Ctor.super) { // Vue.extend()搞出来的
+    const superOptions = resolveConstructorOptions(Ctor.super) // 父父类的构造函数
+    const cachedSuperOptions = Ctor.superOptions // 父父类的选项
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
@@ -120,6 +123,7 @@ export function resolveConstructorOptions(Ctor: typeof Component) {
       }
     }
   }
+  // 返回弗雷及其祖先？
   return options
 }
 

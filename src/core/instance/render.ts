@@ -100,11 +100,11 @@ export function renderMixin(Vue: typeof Component) {
     return nextTick(fn, this)
   }
 
-  Vue.prototype._render = function (): VNode { // 创建VNode
+  Vue.prototype._render = function (): VNode { // 为了得到虚拟 Node
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 
-    if (_parentVnode && vm._isMounted) {
+    if (_parentVnode && vm._isMounted) { // _isMounted 只有组件更新才会触发这个东西
       vm.$scopedSlots = normalizeScopedSlots(
         vm.$parent!,
         _parentVnode.data!.scopedSlots,
@@ -127,6 +127,7 @@ export function renderMixin(Vue: typeof Component) {
       // when parent component is patched.
       setCurrentInstance(vm)
       currentRenderingInstance = vm
+      // 执行渲染函数 prototype._render -> vm.render(vm, $createElement)
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e: any) {
       handleError(e, vm, `render`)

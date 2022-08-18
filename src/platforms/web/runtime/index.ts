@@ -33,12 +33,15 @@ extend(Vue.options.components, platformComponents)
 // patch 方法在这里挂载到原型上
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
+// runtime 的 $mount没有模板编译
 // public mount method
-Vue.prototype.$mount = function ( // 执行的是mountComponent 方法
+Vue.prototype.$mount = function ( // 执行的是mountComponent 方法， 这个是没有模板编译的 $mount
   el?: string | Element,
   hydrating?: boolean
 ): Component {
   el = el && inBrowser ? query(el) : undefined
+  // 这个el 就是 DOM 元素 或者 是 undefined ， hydrating 是 SSR
+  //                    vm (目前只知道根组件显示的调了 $mount)
   return mountComponent(this, el, hydrating)
 }
 

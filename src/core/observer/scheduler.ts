@@ -90,6 +90,7 @@ function flushSchedulerQueue() {
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
+    // 执行 beforeUpdate 钩子， 或者用户 watcher 配置了 before 选项
     if (watcher.before) {
       watcher.before()
     }

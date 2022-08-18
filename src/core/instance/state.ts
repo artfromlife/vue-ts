@@ -182,17 +182,19 @@ function initComputed(vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
+    // 这么说来， 你写的 computed 就是一个 getter
     const getter = isFunction(userDef) ? userDef : userDef.get
     if (__DEV__ && getter == null) {
       warn(`Getter is missing for computed property "${key}".`, vm)
     }
 
-    if (!isSSR) {
+    if (!isSSR) { // 不是服务端渲染， lazy： true new Watcher 的时候不会进行依赖收集, getter 就是定义的 computed 函数
       // create internal watcher for the computed property.
+      // 相当于 this._computedWatchers[key] = new Watcher
       watchers[key] = new Watcher(
         vm,
         getter || noop,
-        noop,
+        noop, // computed watcher 是没有 回调的 ！！！
         computedWatcherOptions
       )
     }
@@ -200,6 +202,7 @@ function initComputed(vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
+    // key就是 computed 的函数名
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     } else if (__DEV__) {
@@ -223,18 +226,18 @@ export function defineComputed(
   userDef: Record<string, any> | (() => any)
 ) {
   const shouldCache = !isServerRendering()
-  if (isFunction(userDef)) {
-    sharedPropertyDefinition.get = shouldCache
-      ? createComputedGetter(key)
+  if (isFunction(userDef)) { // 正常的开发都会进来这里， computed 里面写的是函数
+    sharedPropertyDefinition.get = shouldCache // true
+      ? createComputedGetter(key)  //
       : createGetterInvoker(userDef)
-    sharedPropertyDefinition.set = noop
+    sharedPropertyDefinition.set = noop // 没有set, 说明你直接改不了这个 this.computedKey
   } else {
     sharedPropertyDefinition.get = userDef.get
       ? shouldCache && userDef.cache !== false
         ? createComputedGetter(key)
-        : createGetterInvoker(userDef.get)
-      : noop
-    sharedPropertyDefinition.set = userDef.set || noop
+        : createGetterInvoker(userDef.get) // 不缓存的话， 每次就是简单的执行 getter 的计算， 你访问我就计算， 用 cache 的话， 就是我用 watcher 帮你做了缓存，
+      : noop                               // 依赖更新 -> update -> dirty -> 再次访问 -> 执行 watcher.get() -> 重新计算
+    sharedPropertyDefinition.set = userDef.set || noop // 应该就是给了你直接改 computed 值的能力, 但是你就是直接改 computed的值，改完之后去访问， 还是之前的老值啊
   }
   if (__DEV__ && sharedPropertyDefinition.set === noop) {
     sharedPropertyDefinition.set = function () {
@@ -248,13 +251,16 @@ export function defineComputed(
 }
 
 function createComputedGetter(key) {
-  return function computedGetter() {
+  return function computedGetter() { // 平成的访问 this.computedKey 都会触发这个东西
+    // this 就是实例
     const watcher = this._computedWatchers && this._computedWatchers[key]
+    // 难道还有 watcher 不存再的情况？ // 第一次触发computedGetter的时候
     if (watcher) {
-      if (watcher.dirty) {
+      // this，dirty = this.lazy =true
+      if (watcher.dirty) { // 初次取值， 进行依赖收集， lazy watcher 从不 update ?? 只有 dirty 为true 的时候， 才会再从进行依赖收集和计算
         watcher.evaluate()
       }
-      if (Dep.target) {
+      if (Dep.target) { // 说明什么，这个 computed 被 watch 了
         if (__DEV__ && Dep.target.onTrack) {
           Dep.target.onTrack({
             effect: Dep.target,
@@ -265,6 +271,7 @@ function createComputedGetter(key) {
         }
         watcher.depend()
       }
+      // 每次一访问就返回 watcher 的 value
       return watcher.value
     }
   }
