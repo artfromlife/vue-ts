@@ -391,7 +391,7 @@ export function deactivateChildComponent(vm: Component, direct?: boolean) {
 }
 
 export function callHook(
-  vm: Component,
+  vm: Component ,
   hook: string,
   args?: any[],
   setContext = true
@@ -402,6 +402,8 @@ export function callHook(
   setContext && setCurrentInstance(vm)
   const handlers = vm.$options[hook] // 选项里面的 hook 本来是函数，最后变成了数组， 。。。 这个 和 合并选项有关
   const info = `${hook} hook`
+  // 打印一下生命周期, 递归的生效核心、在 $mount 方法中
+  console.log(`${vm.$options.name} ---[${hook}]`)
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
       invokeWithErrorHandling(handlers[i], vm, args || null, vm, info)
