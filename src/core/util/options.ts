@@ -24,12 +24,13 @@ import type { ComponentOptions } from 'types/options'
  * how to merge a parent option value and a child option
  * value into the final value.
  */
-const strats = config.optionMergeStrategies // {} -> null
+const strats = config.optionMergeStrategies //  选项的合并策略, 现在是一个没有原型的空对象
 
 /**
  * Options with restrictions
  */
 if (__DEV__) {
+  // el 和 propsData 的合并策略 ， 默认的合并策略 ： child 有值就用child ,否者用parent
   strats.el = strats.propsData = function (
     parent: any,
     child: any,
@@ -123,7 +124,7 @@ export function mergeDataOrFn(
     }
   }
 }
-
+// data 的合并策略 , 这个data也能合并的？
 strats.data = function (
   parentVal: any,
   childVal: any,
@@ -154,16 +155,17 @@ export function mergeLifecycleHook(
   parentVal: Array<Function> | null,
   childVal: Function | Array<Function> | null
 ): Array<Function> | null {
-  const res = childVal
-    ? parentVal
+  const res = childVal     // child有生命周期钩子 ? 没有就直接返回 parent
+    ? parentVal            // parent有生命周期钩子 就把child 推到parent ， 否则把child 搞成数组的形式
       ? parentVal.concat(childVal)
       : isArray(childVal)
       ? childVal
       : [childVal]
     : parentVal
+  // hooks 去重 ==
   return res ? dedupeHooks(res) : res
 }
-
+// dedupe === 重复数据删除
 function dedupeHooks(hooks: any) {
   const res: Array<any> = []
   for (let i = 0; i < hooks.length; i++) {
@@ -174,6 +176,7 @@ function dedupeHooks(hooks: any) {
   return res
 }
 
+// 生命周期选项的合并策略 ！
 LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeLifecycleHook
 })
@@ -200,6 +203,7 @@ function mergeAssets(
   }
 }
 
+// components , filters , directives 怎么合并 ？ 寄生式继承 ？？？
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -437,6 +441,7 @@ export function mergeOptions(
   }
   function mergeField(key: any) {
     const strat = strats[key] || defaultStrat
+    // 选项的合并策略 -> 是一个函数 (pv,cv,vm,k)
     options[key] = strat(parent[key], child[key], vm, key)
   }
   return options
