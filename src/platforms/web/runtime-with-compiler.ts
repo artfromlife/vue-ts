@@ -22,7 +22,7 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  el = el && query(el)
+  el = el && query(el) // 带模板编译的, el被转换成 DOM元素
 
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
@@ -36,9 +36,9 @@ Vue.prototype.$mount = function (
   const options = this.$options
   // resolve template/el and convert to render function
   if (!options.render) {
-    let template = options.template
+    let template = options.template // 没有render 函数， 就取到模板， 模板取到的都是 innerHTML
     if (template) {
-      if (typeof template === 'string') {
+      if (typeof template === 'string') { // 可以是 #app ID选择器
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           /* istanbul ignore if */
@@ -49,15 +49,15 @@ Vue.prototype.$mount = function (
             )
           }
         }
-      } else if (template.nodeType) {
-        template = template.innerHTML
+      } else if (template.nodeType) {  // 可以是 DOM元素
+        template = template.innerHTML // 直接取 innerHTML , 就是自己内部的 html 字符串 // outerHTML 就是包含自身
       } else {
         if (__DEV__) {
           warn('invalid template option:' + template, this)
         }
         return this
       }
-    } else if (el) {
+    } else if (el) { // 没有 template 但是有 el ,
       // @ts-expect-error
       template = getOuterHTML(el)
     }
@@ -68,7 +68,7 @@ Vue.prototype.$mount = function (
       }
 
       const { render, staticRenderFns } = compileToFunctions(
-        template,
+        template,  // 将 template 编译成 render 函数
         {
           outputSourceRange: __DEV__,
           shouldDecodeNewlines,

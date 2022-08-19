@@ -30,7 +30,8 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
-// patch 方法在这里挂载到原型上
+// __patch__ 方法在这里挂载到原型上
+
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // runtime 的 $mount没有模板编译

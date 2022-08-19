@@ -194,7 +194,8 @@ export function mountComponent(
       // 这个就是 render Watcher 要观测的组件虚拟DOM
       // 渲染Watcher 一定是比用户的watcher, computed 执行晚的, 但是子组件呢                                         // 再次进行依赖收集，新旧的 dep
       // vm.render() 执行的过程中, 进行的依赖收集， 依赖更新，通过 notify -> update -> queueWatcher -> run -> get -> vm._update()
-      vm._update(vm._render(), hydrating)
+      // render的执行, 最后会触发 createElement (关键)
+      vm._update(vm._render(), hydrating) // render 里面用了 子组件怎么办， 用了全局组件怎么办， options.component 是通过原型链找的
     }
   }
 

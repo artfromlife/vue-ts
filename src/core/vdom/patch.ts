@@ -797,7 +797,7 @@ export function createPatchFunction(backend) {
       return node.nodeType === (vnode.isComment ? 8 : 3)
     }
   }
-
+  // 初次渲染 oldVNode 就是真实的DOM吧
   return function patch(oldVnode, vnode, hydrating, removeOnly) {
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
@@ -816,7 +816,7 @@ export function createPatchFunction(backend) {
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
-      } else {
+      } else { // 初次渲染？？？
         if (isRealElement) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform

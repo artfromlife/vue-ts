@@ -25,10 +25,10 @@ const ALWAYS_NORMALIZE = 2
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
 export function createElement(
-  context: Component,
-  tag: any,
-  data: any,
-  children: any,
+  context: Component, // 这个是 vm(组件实例)
+  tag: any,  // 子组件名称
+  data: any, // 子组件属性
+  children: any, // 子子组件
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
@@ -125,7 +125,9 @@ export function _createElement(
       vnode = new VNode(tag, data, children, undefined, undefined, context)
     }
   } else {
-    // direct component options / constructor
+    // direct component options / constructor  // 选项或者传入的构造函数
+    // 这就是子组件实例化 ？？？？ , context 就是父实例吧
+    // tag 就是选项对象吧
     vnode = createComponent(tag as any, data, context, children)
   }
   if (isArray(vnode)) {

@@ -1,3 +1,6 @@
+// @ts-ignore
+// @ts-ignore
+
 import config from '../config'
 import { initProxy } from './proxy'
 import { initState } from './state'
@@ -58,7 +61,7 @@ export function initMixin(Vue: typeof Component) {
     vm._self = vm  // 6.又搞了个东西指向自己
     initLifecycle(vm) // 7. 通过 $options 构建$parent, $children
     initEvents(vm) // 8. 可能和父组件，监听子组件事件有关系 _events
-    initRender(vm) // 9. 这点有点复杂，不是很懂
+    initRender(vm) // 9. 这点有点复杂，不是很懂 //  vm._c  , vm.$createdElement
     callHook(vm, 'beforeCreate', undefined, false /* setContext */) // callHook 执行的是 Hooks 数组
     initInjections(vm) // resolve injections before data/props
     initState(vm) // 10. 这就是先 让 数据变成 reactive
@@ -76,7 +79,6 @@ export function initMixin(Vue: typeof Component) {
       // 开始挂载了
       vm.$mount(vm.$options.el)
     }
-  }
 }
 
 export function initInternalComponent(

@@ -22,7 +22,7 @@ stateMixin(Vue)
 eventsMixin(Vue)
 //@ts-expect-error Vue has function type  原型上加 _update , $forceUpdate , $destroy
 lifecycleMixin(Vue)
-//@ts-expect-error Vue has function type  原型上加 _render , $nextTick
+//@ts-expect-error Vue has function type  原型上加 _render , $nextTick  // _render 中其实执行的是 render.call(vm._renderProxy, vm.$createElement)
 renderMixin(Vue)
 
 export default Vue as unknown as GlobalAPI

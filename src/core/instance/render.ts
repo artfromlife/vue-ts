@@ -128,6 +128,7 @@ export function renderMixin(Vue: typeof Component) {
       setCurrentInstance(vm)
       currentRenderingInstance = vm
       // 执行渲染函数 prototype._render -> vm.render(vm, $createElement)
+      // 这就是 render 函数的 this 是组件实例， 第一个参数是 createElement
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e: any) {
       handleError(e, vm, `render`)
