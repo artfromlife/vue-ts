@@ -15,7 +15,7 @@
 <script>
   const son = {name: `son`, template:`<div>Hello</div>`}
   const son1 = {name: `son1`, template:`<div>Hello1</div>`}
-  const father = {name: `Father`, components: {son,son1}, template:`<div><son></son><son1></son1></div>`}
+  const father = {name: `Father`, components: {son,son1}, template:`<div><son></son><son></son><son1></son1></div>`}
   new Vue({
     name: `root`,
     template: '<father></father>',

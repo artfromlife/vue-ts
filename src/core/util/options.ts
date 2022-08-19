@@ -203,7 +203,7 @@ function mergeAssets(
   }
 }
 
-// components , filters , directives 怎么合并 ？ 寄生式继承 ？？？
+// components , filters , directives 怎么合并 ？ 原型链式的合并, parent 的值 会作为 child 的原型
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -226,13 +226,13 @@ strats.watch = function (
   //@ts-expect-error work around
   if (childVal === nativeWatch) childVal = undefined
   /* istanbul ignore if */
-  if (!childVal) return Object.create(parentVal || null)
+  if (!childVal) return Object.create(parentVal || null) // 又是原型链的方式
   if (__DEV__) {
     assertObjectType(key, childVal, vm)
   }
   if (!parentVal) return childVal
   const ret: Record<string, any> = {}
-  extend(ret, parentVal)
+  extend(ret, parentVal) // 两个都有, 拼成成数组
   for (const key in childVal) {
     let parent = ret[key]
     const child = childVal[key]
@@ -247,6 +247,7 @@ strats.watch = function (
 /**
  * Other object hashes.
  */
+// 子类 覆盖 父类 的
 strats.props =
   strats.methods =
   strats.inject =
@@ -379,9 +380,9 @@ function normalizeDirectives(options: Record<string, any>) {
         dirs[key] = { bind: def, update: def }
       }
     }
+
   }
 }
-
 function assertObjectType(name: string, value: any, vm: Component | null) {
   if (!isPlainObject(value)) {
     warn(
@@ -396,6 +397,7 @@ function assertObjectType(name: string, value: any, vm: Component | null) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+// 根据合并策略来合并选项, 这个就非常的开放了, 可以借鉴一下, 来搞低代码之类的
 export function mergeOptions(
   parent: Record<string, any>,
   child: Record<string, any>,
@@ -409,7 +411,7 @@ export function mergeOptions(
     // @ts-expect-error
     child = child.options
   }
-  // 都是对 child 的处理
+  // merge 之前, 先把这几个选项都给规范化成对象,
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
