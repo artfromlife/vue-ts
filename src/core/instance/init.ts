@@ -76,7 +76,6 @@ export function initMixin(Vue: typeof Component) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
     if (vm.$options.el)  // 这个el 只有跟组件才有, 那么子组件怎么 mount 呢
       // 开始挂载了
       vm.$mount(vm.$options.el)

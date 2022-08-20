@@ -22,6 +22,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
         if (type === 'component' && isPlainObject(definition)) {
           // @ts-expect-error
           definition.name = definition.name || id
+          console.log(`regis ${(definition as any).name }`)
           definition = this.options._base.extend(definition)
         }
         if (type === 'directive' && isFunction(definition)) {

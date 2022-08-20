@@ -7,20 +7,29 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
   <script src="../dist/vue.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 <body>
 <div>
-  <div id="app"></div>
+  <div id="app">
+    <el-select value='1'>
+      <el-option value='1'>
+        just for example
+      </el-option>
+    </el-select>
+    <el-button @click="count++">count : {{count}}</el-button>
+  </div>
 </div>
 <script>
-  const son = {name: `son`, template:`<div>Hello</div>`}
-  const son1 = {name: `son1`, template:`<div>Hello1</div>`}
-  const father = {name: `Father`, components: {son,son1}, template:`<div><son></son><son></son><son1></son1></div>`}
   new Vue({
-    name: `root`,
-    template: '<father></father>',
-    components: {father}
-  }).$mount('#app')
+    el: '#app',
+    name: `RootApp`,
+    data: function() {
+      return { count: 0 }
+    }
+  })
+  console.dir(Vue)
 </script>
 </body>
 </html>
