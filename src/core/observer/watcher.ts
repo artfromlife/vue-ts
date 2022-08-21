@@ -146,6 +146,7 @@ export default class Watcher implements DepTarget {
       popTarget()
       // 每一次的 update 都会执行 get 重新进行依赖收集, 目的就是由于闭包产生的 dep 把不用的 watcher 从 subs 中拿掉， 减少内存泄露
       // 每一次的 依赖收集都要把 watcher 从不要的 dep 中清除掉
+
       this.cleanupDeps()
     }
     return value
@@ -160,7 +161,7 @@ export default class Watcher implements DepTarget {
       this.newDepIds.add(id) // watcher 反向收集 Dep
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) { // depIds 里面没有 这个 dep , 说明 watcher 还没有被添加到 dep.sub 中
-        dep.addSub(this)
+        dep.addSub(this) // 双向收集！
       }
     }
   }

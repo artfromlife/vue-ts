@@ -38,7 +38,7 @@ export function initMixin(Vue: typeof Component) {
     // effect scope
     vm._scope = new EffectScope(true /* detached */) // 3.给实例加 _scope
     // merge options // 最重要的 $options !!!!
-    if (options && options._isComponent) { // 最开始是不会有options里面有 _isComponent
+    if (options && options._isComponent) { // vNode.componentOptions =^=
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.

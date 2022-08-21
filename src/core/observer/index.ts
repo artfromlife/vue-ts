@@ -52,9 +52,9 @@ export class Observer {
 
   constructor(public value: any, public shallow = false, public mock = false) {
     // this.value = value
-    this.dep = mock ? mockDep : new Dep()
+    this.dep = mock ? mockDep : new Dep()  // mock 应该和 SSR 有关系
     this.vmCount = 0
-    def(value, '__ob__', this)
+    def(value, '__ob__', this) // 将其设置为不可枚举
     if (isArray(value)) {
       if (!mock) {
         if (hasProto) {
@@ -68,7 +68,7 @@ export class Observer {
           }
         }
       }
-      if (!shallow) {
+      if (!shallow) { // 是不是 浅观测, 如果是浅观测， 那么数组里的具体值就不会是响应式的数据
         this.observeArray(value)
       }
     } else {
@@ -152,7 +152,7 @@ export function defineReactive(
   ) {
     val = obj[key]
   }
-
+  // childOb 就是 val 是”对象“的 的情况下， val 的不可枚举属性 __ob__
   let childOb = !shallow && observe(val, false, mock)
   Object.defineProperty(obj, key, {
     enumerable: true,
@@ -171,7 +171,7 @@ export function defineReactive(
         }
         if (childOb) {
           childOb.dep.depend()
-          if (isArray(value)) {
+          if (isArray(value)) { // 深度的依赖收集
             dependArray(value)
           }
         }

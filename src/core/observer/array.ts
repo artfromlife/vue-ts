@@ -27,7 +27,7 @@ methodsToPatch.forEach(function (method) {
   const original = arrayProto[method]
   def(arrayMethods, method, function mutator(...args) {
     const result = original.apply(this, args)
-    // this 就是 array instance
+    // this 就是 array instance ， 每个响应式 ”对象“ 都有一个不可枚举的 __ob__ 属性
     const ob = this.__ob__
     let inserted
     switch (method) {
@@ -39,6 +39,7 @@ methodsToPatch.forEach(function (method) {
         inserted = args.slice(2)
         break
     }
+    // 把插入的数据也变成响应式的
     if (inserted) ob.observeArray(inserted)
     // notify change
     if (__DEV__) {

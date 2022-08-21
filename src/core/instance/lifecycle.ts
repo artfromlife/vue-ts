@@ -93,7 +93,7 @@ export function lifecycleMixin(Vue: typeof Component) {
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
-      // 强制运行当前渲染watcher 的回调
+      // 强制运行当前渲染 watcher , 当然那个组件调用就更新那个组件
       vm._watcher.update()
     }
   }
@@ -196,6 +196,8 @@ export function mountComponent(
       // vm.render() 执行的过程中, 进行的依赖收集， 依赖更新，通过 notify -> update -> queueWatcher -> run -> get -> vm._update()
       // render的执行, 最后会触发 createElement (关键)
       vm._update(vm._render(), hydrating) // render 里面用了 子组件怎么办， 用了全局组件怎么办， options.component 是通过原型链找的
+      // 这个函数是 getter , 用来获取新的value的, 所以每次执行 update 都要调用来获取 新的value
+      // 如果是渲染 watcher, 就没有回调需要执行， 所以就是执行了这个， _render() 的执行 的到虚拟DOM，
     }
   }
 

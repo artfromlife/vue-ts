@@ -17,14 +17,16 @@ export function initExtend(Vue: GlobalAPI) {
   /**
    * Class inheritance
    */
-  // 传入一个选项， 返回一个组件（）
+  // 传入一个选项， 返回一个构造函数吧
   Vue.extend = function (extendOptions: any): typeof Component {
     extendOptions = extendOptions || {}
+    // 扩展选项
     const Super = this  // Super -> Vue
     const SuperId = Super.cid // -> 0
     // 你传进来的选项是否有 _Ctor , 没有的话，_Ctor = {}
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
     if (cachedCtors[SuperId]) { // 如果 _Ctor[0], 明显没有值
+      // 防止一个 options 被同一个基类构造函数扩展2次 ， why?
       return cachedCtors[SuperId]
     }
 
@@ -33,30 +35,33 @@ export function initExtend(Vue: GlobalAPI) {
     if (__DEV__ && name) {
       validateComponentName(name)
     }
-
+    // 扩展出子类构造函数
     const Sub = function VueComponent(this: any, options: any) {
       // 这个This 又是啥啊, 这要看你怎么运行这个Sub了
+      // 最后执行 new Sub , 这个 this 就是 sub 实例， 通过原型链的形式拿到 Sub.prototype.__proto__._init
       this._init(options)
     } as unknown as typeof Component
-    // Super 还是 Vue, Sub -> {} -> Vue.prototype
+    // 构造函数的继承    这个属于什么继承呢 高程里面讲的有
     Sub.prototype = Object.create(Super.prototype)
-    // 细节
     Sub.prototype.constructor = Sub
-    // 来一个新Vue cid就加一下
+    // 创造出一个新的 Vue 构造函数 cid 就加一下
     Sub.cid = cid++
-    // 这就是核心, 选项合并， 咋说呢， 不知道这个咋合并的，父类的options里的内同只是把key搞过来了
-    // extendOptions 估计还没有 _base 把
+    // Vue.options 中都有啥呢 , components , filters , directives , _base
+    // 根据合并策略进行选项合并 , components , filters , directives 都是通过原型链的方式合并的，创建一个新的对象， 原型是父类对象
     Sub.options = mergeOptions(Super.options, extendOptions)
-    // 这样每一个子构造器的 super 都他妈指向了 Vue
+    // 每个扩展后的构造函数 都有一个 super 指向他的基类构造函数
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on
     // the Vue instances at extension time, on the extended prototype. This
     // avoids Object.defineProperty calls for each instance created.
     if (Sub.options.props) {
+      // 把 props 中具体的某个prop 的访问 代理到 扩展后的构造函数的原型上去 ,实际操作的是 Sub.prototype._props[prop]
+      // 这样所有组件实例的 prop 都指向了同一个原型
       initProps(Sub)
     }
     if (Sub.options.computed) {
+      // computed 的访问也代理到原型上去
       initComputed(Sub)
     }
 
@@ -73,6 +78,8 @@ export function initExtend(Vue: GlobalAPI) {
     ASSET_TYPES.forEach(function (type) {
       Sub[type] = Super[type]
     })
+
+    // Sub.options 中 有 _base , components 中还有自己 , 就是extendOptions中绝大部分东西
     // enable recursive self-lookup
     if (name) {
       Sub.options.components[name] = Sub

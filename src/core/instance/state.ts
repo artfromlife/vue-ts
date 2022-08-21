@@ -51,7 +51,7 @@ export function proxy(target: Object, sourceKey: string, key: string) {
 
 export function initState(vm: Component) {
   const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
+  if (opts.props) initProps(vm, opts.props) // 有一点点蒙蔽 （shallow
 
   // Composition API
   initSetup(vm)
@@ -63,15 +63,15 @@ export function initState(vm: Component) {
     const ob = observe((vm._data = {}))
     ob && ob.vmCount++
   }
-  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.computed) initComputed(vm, opts.computed) // 不会立即执行 watcher 的 getter
   if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch)
+    initWatch(vm, opts.watch) // 立即执行 watcher 的 getter
   }
 }
-
+// props 初始化
 function initProps(vm: Component, propsOptions: Object) {
-  const propsData = vm.$options.propsData || {}
-  const props = (vm._props = shallowReactive({}))
+  const propsData = vm.$options.propsData || {}  // propsData 是子组件实例化的时候， 父组件的VNode.child[VNode.componentOptions.propsData]
+  const props = (vm._props = shallowReactive({})) // shallow 说明只有第一层是响应式的 , 这个和 Vue3 有关
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys: string[] = (vm.$options._propKeys = [])

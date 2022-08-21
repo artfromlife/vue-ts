@@ -284,7 +284,7 @@ function checkComponents(options: Record<string, any>) {
     validateComponentName(key)
   }
 }
-
+// 必须是英文字母开头 ， 接下来的字母可以是 - . 数字 _ 或者俺不知道的东西
 export function validateComponentName(name: string) {
   if (
     !new RegExp(`^[a-zA-Z][\\-\\.0-9_${unicodeRegExp.source}]*$`).test(name)
